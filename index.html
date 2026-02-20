@@ -102,6 +102,24 @@
                 [data-theme="dark"] #gi-detail-content th {
                     color: #ffffff !important;
                 }
+
+                /* Label teks permanen di peta */
+        .label-gi {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: #333;
+            font-weight: 800;
+            text-shadow: 1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff;
+            font-family: 'Rajdhani', sans-serif;
+            pointer-events: none; /* Supaya tidak menghalangi klik pada marker */
+        }
+
+        /* Penyesuaian teks saat Mode Gelap */
+        [data-theme="dark"] .label-gi {
+            color: #fff;
+            text-shadow: 1px 1px 2px #000, -1px -1px 2px #000;
+        }
     </style>
 </head>
 <body>
@@ -213,74 +231,74 @@
 
         // --- 2. FUNGSI KLIK GI ---
         async function onGIClick(namaGI) {
-    const mainDiv = document.getElementById('main-dashboard-content');
-    const detailDiv = document.getElementById('gi-detail-content');
-    
-    mainDiv.style.display = 'none';
-    detailDiv.innerHTML = `<div class="dash-card"><h3>Memuat Data Komplit ${namaGI}...</h3></div>`;
+        const mainDiv = document.getElementById('main-dashboard-content');
+        const detailDiv = document.getElementById('gi-detail-content');
+        
+        mainDiv.style.display = 'none';
+        detailDiv.innerHTML = `<div class="dash-card"><h3>Memuat Data Komplit ${namaGI}...</h3></div>`;
 
-    try {
-        const response = await fetch(`${urlAPI}?gi=${namaGI}`);
-        const data = await response.json();
+        try {
+            const response = await fetch(`${urlAPI}?gi=${namaGI}`);
+            const data = await response.json();
 
-        if (data.length === 0) {
-            detailDiv.innerHTML = `<div class="dash-card"><h3>Data tidak ditemukan.</h3><button onclick="closeDetail()" style="width:100%; padding:10px;">Kembali</button></div>`;
-            return;
-        }
+            if (data.length === 0) {
+                detailDiv.innerHTML = `<div class="dash-card"><h3>Data tidak ditemukan.</h3><button onclick="closeDetail()" style="width:100%; padding:10px;">Kembali</button></div>`;
+                return;
+            }
 
-        let htmlContent = `
-            <div class="dash-card" style="padding: 10px;">
-                <div class="dash-title">DETAIL DATASET UFR: ${namaGI.toUpperCase()}</div>
-                <div style="font-size: 11px; margin-bottom: 8px;">Subsistem: <b>${data[0].subsistem}</b></div>
+            let htmlContent = `
+                <div class="dash-card" style="padding: 10px;">
+                    <div class="dash-title">DETAIL DATASET UFR: ${namaGI.toUpperCase()}</div>
+                    <div style="font-size: 11px; margin-bottom: 8px;">Subsistem: <b>${data[0].subsistem}</b></div>
+                    
+                    <div style="overflow-x: auto; border: 1px solid #ddd; border-radius: 4px;">
+                        <table style="width:100%; font-size:10px; border-collapse:collapse; white-space: nowrap;" border="1">
+                            <thead style="background:#f8f9fa;">
+                                <tr>
+                                    <th rowspan="2">Penyulang</th>
+                                    <th rowspan="2">TD</th>
+                                    <th colspan="2" class="lwbp-header" style="background:#e3f2fd;">LWBP</th>
+                                    <th colspan="2" class="wbp-header" style="background:#fff3e0;">WBP</th>
+                                    <th rowspan="2">THP</th>
+                                    <th rowspan="2">Keterangan</th>
+                                </tr>
+                                <tr>
+                                    <th style="background:#e3f2fd;">A</th><th style="background:#e3f2fd;">MW</th>
+                                    <th style="background:#fff3e0;">A</th><th style="background:#fff3e0;">MW</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+            data.forEach(row => {
+                // Logika warna: Merah jika BLOK, Biru jika AKTIF
+                let statusColor = row.keterangan.toUpperCase().includes("BLOK") ? "#ff4d4d" : "#0072bc";
                 
-                <div style="overflow-x: auto; border: 1px solid #ddd; border-radius: 4px;">
-                    <table style="width:100%; font-size:10px; border-collapse:collapse; white-space: nowrap;" border="1">
-                        <thead style="background:#f8f9fa;">
-                            <tr>
-                                <th rowspan="2">Penyulang</th>
-                                <th rowspan="2">TD</th>
-                                <th colspan="2" class="lwbp-header" style="background:#e3f2fd;">LWBP</th>
-                                <th colspan="2" class="wbp-header" style="background:#fff3e0;">WBP</th>
-                                <th rowspan="2">THP</th>
-                                <th rowspan="2">Keterangan</th>
-                            </tr>
-                            <tr>
-                                <th style="background:#e3f2fd;">A</th><th style="background:#e3f2fd;">MW</th>
-                                <th style="background:#fff3e0;">A</th><th style="background:#fff3e0;">MW</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
+                htmlContent += `
+                    <tr>
+                        <td style="padding:5px; font-weight:bold;">${row.penyulang}</td>
+                        <td align="center">${row.td}</td>
+                        <td align="right" style="padding:2px 5px;">${parseFloat(row.lwbp_a).toFixed(1)}</td>
+                        <td align="right" style="padding:2px 5px; font-weight:bold;">${parseFloat(row.lwbp_mw).toFixed(2)}</td>
+                        <td align="right" style="padding:2px 5px;">${parseFloat(row.wbp_a).toFixed(1)}</td>
+                        <td align="right" style="padding:2px 5px; font-weight:bold;">${parseFloat(row.wbp_mw).toFixed(2)}</td>
+                        <td align="center"><b>${row.tahap}</b></td>
+                        <td style="padding:2px 5px; color:${statusColor}; font-style:italic;">${row.keterangan}</td>
+                    </tr>`;
+            });
 
-        data.forEach(row => {
-            // Logika warna: Merah jika BLOK, Biru jika AKTIF
-            let statusColor = row.keterangan.toUpperCase().includes("BLOK") ? "#ff4d4d" : "#0072bc";
-            
             htmlContent += `
-                <tr>
-                    <td style="padding:5px; font-weight:bold;">${row.penyulang}</td>
-                    <td align="center">${row.td}</td>
-                    <td align="right" style="padding:2px 5px;">${parseFloat(row.lwbp_a).toFixed(1)}</td>
-                    <td align="right" style="padding:2px 5px; font-weight:bold;">${parseFloat(row.lwbp_mw).toFixed(2)}</td>
-                    <td align="right" style="padding:2px 5px;">${parseFloat(row.wbp_a).toFixed(1)}</td>
-                    <td align="right" style="padding:2px 5px; font-weight:bold;">${parseFloat(row.wbp_mw).toFixed(2)}</td>
-                    <td align="center"><b>${row.tahap}</b></td>
-                    <td style="padding:2px 5px; color:${statusColor}; font-style:italic;">${row.keterangan}</td>
-                </tr>`;
-        });
+                            </tbody>
+                        </table>
+                    </div>
+                    <button onclick="closeDetail()" style="margin-top:15px; width:100%; padding:12px; cursor:pointer; background:var(--pln-blue); color:white; border:none; border-radius:5px; font-weight:bold; letter-spacing:1px;">KEMBALI KE OVERVIEW</button>
+                </div>`;
 
-        htmlContent += `
-                        </tbody>
-                    </table>
-                </div>
-                <button onclick="closeDetail()" style="margin-top:15px; width:100%; padding:12px; cursor:pointer; background:var(--pln-blue); color:white; border:none; border-radius:5px; font-weight:bold; letter-spacing:1px;">KEMBALI KE OVERVIEW</button>
-            </div>`;
+            detailDiv.innerHTML = htmlContent;
 
-        detailDiv.innerHTML = htmlContent;
-
-    } catch (error) {
-        detailDiv.innerHTML = `<div class="dash-card"><h3>Gagal Memuat Data</h3><button onclick="closeDetail()">Kembali</button></div>`;
+        } catch (error) {
+            detailDiv.innerHTML = `<div class="dash-card"><h3>Gagal Memuat Data</h3><button onclick="closeDetail()">Kembali</button></div>`;
+        }
     }
-}
 
         function closeDetail() {
             document.getElementById('main-dashboard-content').style.display = 'flex';
@@ -297,79 +315,79 @@
         // --- 4. DATA NODES & LINKS ---
         var nodes = {
             // SUMBAR
-            "muko_muko": { loc: [-2.55, 101.12], name: "Muko-Muko" },
-            "tapan": { loc: [-2.15, 101.10], name: "Tapan" },
-            "kambang": { loc: [-1.85, 100.95], name: "Kambang" },
-            "teluk_sirih": { loc: [-1.12, 100.39], name: "Teluk Sirih" },
-            "bungus": { loc: [-1.02, 100.41], name: "Bungus" },
-            "indarung": { loc: [-0.95, 100.46], name: "Indarung" },
-            "pauh_limo": { loc: [-0.92, 100.43], name: "Pauh Limo" },
-            "simpang_haru": { loc: [-0.94, 100.38], name: "Simpang Haru" },
-            "pip": { loc: [-0.82, 100.34], name: "PIP" },
-            "lubuk_alung": { loc: [-0.68, 100.28], name: "Lubuk Alung" },
-            "pariaman": { loc: [-0.62, 100.12], name: "Pariaman" },
-            "maninjau": { loc: [-0.33, 100.20], name: "Maninjau" },
-            "singkarak": { loc: [-0.62, 100.52], name: "Singkarak" },
-            "simpang_empat": { loc: [0.09, 99.80], name: "Simpang Empat" },
-            "pasaman": { loc: [0.20, 100.05], name: "Pasaman" },
-            "solok": { loc: [-0.79, 100.65], name: "Solok" },
-            "salak": { loc: [-0.70, 100.70], name: "Salak" },
-            "ombilin": { loc: [-0.58, 100.75], name: "Ombilin" },
-            "padang_panjang": { loc: [-0.48, 100.40], name: "Padang Panjang" },
-            "batusangkar": { loc: [-0.45, 100.58], name: "BatuSangkar" },
-            "padang_luar": { loc: [-0.31, 100.37], name: "Padang Luar" },
-            "payakumbuh": { loc: [-0.22, 100.63], name: "Payakumbuh", type: "275" },
-            "kiliranjao": { loc: [-1.10, 101.35], name: "Kiliranjao", type: "275" },
+            "muko_muko": { loc: [-2.55, 101.12], name: "Muko-Muko", label: "MUKO" },
+            "tapan": { loc: [-2.15, 101.10], name: "Tapan", label: "TAPAN" },
+            "kambang": { loc: [-1.85, 100.95], name: "Kambang", label: "KMBNG" },
+            "teluk_sirih": { loc: [-1.12, 100.39], name: "Teluk Sirih", label: "TLKSR" },
+            "bungus": { loc: [-1.02, 100.41], name: "Bungus", label: "BNGUS" },
+            "indarung": { loc: [-0.95, 100.46], name: "Indarung", label: "INDRG" },
+            "pauh_limo": { loc: [-0.92, 100.43], name: "Pauh Limo", label: "PLIMO" },
+            "simpang_haru": { loc: [-0.94, 100.38], name: "Simpang Haru", label: "SHARU" },
+            "pip": { loc: [-0.82, 100.34], name: "PIP", label: "PIP" },
+            "lubuk_alung": { loc: [-0.68, 100.28], name: "Lubuk Alung", label: "LBALG" },
+            "pariaman": { loc: [-0.62, 100.12], name: "Pariaman", label: "PRMAN" },
+            "maninjau": { loc: [-0.33, 100.20], name: "Maninjau", label: "MNJAU" },
+            "singkarak": { loc: [-0.62, 100.52], name: "Singkarak", label: "SNKRK"  },
+            "simpang_empat": { loc: [0.09, 99.80], name: "Simpang Empat", label: "SMPAT"  },
+            "pasaman": { loc: [0.20, 100.05], name: "Pasaman", label: "PSMAN"  },
+            "solok": { loc: [-0.79, 100.65], name: "Solok", label: "SOLOK"  },
+            "salak": { loc: [-0.70, 100.70], name: "Salak", label: "SALAK"  },
+            "ombilin": { loc: [-0.58, 100.75], name: "Ombilin", label: "OMBLN"  },
+            "padang_panjang": { loc: [-0.48, 100.40], name: "Padang Panjang", label: "PDPJG"  },
+            "batusangkar": { loc: [-0.45, 100.58], name: "BatuSangkar", label: "BTSKR"  },
+            "padang_luar": { loc: [-0.31, 100.37], name: "Padang Luar", label: "PDGLR"  },
+            "payakumbuh": { loc: [-0.22, 100.63], name: "Payakumbuh", type: "275", label: "PYBUH"  },
+            "kiliranjao": { loc: [-1.10, 101.35], name: "Kiliranjao", type: "275", label: "KLJAO"  },
             // RIAU
-            "teluk_kuantan": { loc: [-0.52, 101.55], name: "Teluk Kuantan" },
-            "rengat": { loc: [-0.38, 102.55], name: "Rengat" },
-            "tembilahan": { loc: [-0.32, 103.15], name: "Tembilahan" },
-            "pkl_kerinci": { loc: [0.36, 101.86], name: "Pangkalan Kerinci" },
-            "pasir_putih": { loc: [0.38, 101.48], name: "Pasir Putih" },
-            "pltgu_riau": { loc: [0.56, 101.55], name: "PLTGU Riau" },
-            "tenayan": { loc: [0.55, 101.52], name: "Tenayan" },
-            "perawang": { loc: [0.65, 101.60], name: "Perawang", type: "500" },
-            "teluk_lembu": { loc: [0.52, 101.48], name: "Teluk Lembu" },
-            "garuda_sakti": { loc: [0.45, 101.35], name: "Garuda Sakti", type: "275" },
+            "teluk_kuantan": { loc: [-0.52, 101.55], name: "Teluk Kuantan", label: "TLKTN"  },
+            "rengat": { loc: [-0.38, 102.55], name: "Rengat", label: "RNGAT"  },
+            "tembilahan": { loc: [-0.32, 103.15], name: "Tembilahan", label: "TMLAN"  },
+            "pkl_kerinci": { loc: [0.36, 101.86], name: "Pangkalan Kerinci", label: "PKKRC"  },
+            "pasir_putih": { loc: [0.38, 101.48], name: "Pasir Putih", label: "PSPTH"  },
+            "pltgu_riau": { loc: [0.56, 101.55], name: "PLTGU Riau", label: ""  },
+            "tenayan": { loc: [0.55, 101.52], name: "Tenayan", label: "TNYAN"  },
+            "perawang": { loc: [0.65, 101.60], name: "Perawang", type: "500", label: "PRWNG"  },
+            "teluk_lembu": { loc: [0.52, 101.48], name: "Teluk Lembu", label: "TLMBU"  },
+            "garuda_sakti": { loc: [0.45, 101.35], name: "Garuda Sakti", type: "275", label: "GRDSK"  },
             "gis_kota": { loc: [0.50, 101.42], name: "GIS Kota" },
-            "bangkinang": { loc: [0.33, 101.02], name: "Bangkinang" },
-            "kotopanjang": { loc: [0.30, 100.80], name: "Koto Panjang" },
-            "pasir_pangaraian": { loc: [0.85, 100.30], name: "Pasir Pangaraian" },
-            "new_garuda_sakti": { loc: [0.48, 101.32], name: "New Garuda Sakti" },
-            "balai_pungut": { loc: [1.05, 101.28], name: "Balai Pungut" },
-            "duri": { loc: [1.25, 101.22], name: "Duri" },
-            "bagan_batu": { loc: [1.69, 100.40], name: "Bagan Batu" },
-            "kota_pinang": { loc: [1.90, 100.08], name: "Kota Pinang" },
-            "rantau_prapat": { loc: [2.10, 99.82], name: "Rantau Prapat" },
-            "dumai": { loc: [1.66, 101.45], name: "Dumai" },
-            "bagan_siapi": { loc: [2.15, 100.80], name: "Bagan Siapi-api" },
-            "kid": { loc: [1.68, 101.58], name: "KID" },
-            "wina": { loc: [1.69, 101.65], name: "WINA" },
-            "pakning": { loc: [1.34, 102.15], name: "Pakning" },
-            "siak": { loc: [0.75, 102.05], name: "Siak" },
+            "bangkinang": { loc: [0.33, 101.02], name: "Bangkinang", label: "BNKNG" },
+            "kotopanjang": { loc: [0.30, 100.80], name: "Koto Panjang", label: "KTPJG" },
+            "pasir_pangaraian": { loc: [0.85, 100.30], name: "Pasir Pangaraian", label: "PSPGR" },
+            "new_garuda_sakti": { loc: [0.48, 101.32], name: "New Garuda Sakti", label: "NGRSK" },
+            "balai_pungut": { loc: [1.05, 101.28], name: "Balai Pungut", label: "BLPGT" },
+            "duri": { loc: [1.25, 101.22], name: "Duri", label: "DURI" },
+            "bagan_batu": { loc: [1.69, 100.40], name: "Bagan Batu", label: "BBATU" },
+            "kota_pinang": { loc: [1.90, 100.08], name: "Kota Pinang", label: "KTPNG" },
+            "rantau_prapat": { loc: [2.10, 99.82], name: "Rantau Prapat", label: "RTPAT" },
+            "dumai": { loc: [1.66, 101.45], name: "Dumai", label: "DUMAI" },
+            "bagan_siapi": { loc: [2.15, 100.80], name: "Bagan Siapi-api", label: "BGAPI" },
+            "kid": { loc: [1.68, 101.58], name: "KID", label: "KID" },
+            "wina": { loc: [1.69, 101.65], name: "WINA", label: "WINA" },
+            "pakning": { loc: [1.34, 102.15], name: "Pakning", label: "PAKNING" },
+            "siak": { loc: [0.75, 102.05], name: "Siak", label: "SIAK5" },
             // JAMBI
-            "sungai_rumbai": { loc: [-1.30, 101.70], name: "Sungai Rumbai" },
-            "muara_labuh": { loc: [-1.48, 101.05], name: "Muara Labuh" },
-            "bangko": { loc: [-2.05, 102.25], name: "Bangko", type: "275" },
-            "merangin": { loc: [-2.20, 102.10], name: "Merangin" },
-            "sungai_penuh": { loc: [-2.06, 101.38], name: "Sungai Penuh" },
-            "muara_bungo": { loc: [-1.49, 102.12], name: "Muara Bungo", type: "275" },
-            "muara_tebo": { loc: [-1.45, 102.45], name: "Muara Tebo" },
-            "muara_bulian": { loc: [-1.75, 103.25], name: "Muara Bulian" },
-            "sarolangun": { loc: [-2.30, 102.70], name: "Sarolangun" },
-            "aur_duri": { loc: [-1.58, 103.55], name: "Aurduri" },
-            "new_aur_duri": { loc: [-1.65, 103.55], name: "New Aurduri", type: "500" },
-            "peranap": { loc: [-0.55, 102.00], name: "Peranap", type: "500" },
-            "payo_selincah": { loc: [-1.60, 103.65], name: "Payo Selincah" },
-            "sei_gelam": { loc: [-1.70, 103.65], name: "Sei Gelam" },
-            "muara_sabak": { loc: [-1.15, 103.85], name: "Muara Sabak" },
-            "kuala_tungkal": { loc: [-0.82, 103.45], name: "Kuala Tungkal" },
-            "pelabuhan_dagang": { loc: [-0.95, 103.15], name: "Pelabuhan Dagang" },
+            "sungai_rumbai": { loc: [-1.30, 101.70], name: "Sungai Rumbai", label: "RMBAI" },
+            "muara_labuh": { loc: [-1.48, 101.05], name: "Muara Labuh", label: "MRBOH" },
+            "bangko": { loc: [-2.05, 102.25], name: "Bangko", type: "275", label: "BGNKO" },
+            "merangin": { loc: [-2.20, 102.10], name: "Merangin", label: "MARANGIN" },
+            "sungai_penuh": { loc: [-2.06, 101.38], name: "Sungai Penuh", label: "SPNUH" },
+            "muara_bungo": { loc: [-1.49, 102.12], name: "Muara Bungo", type: "275", label: "MBNGO" },
+            "muara_tebo": { loc: [-1.45, 102.45], name: "Muara Tebo", label: "MTEBO" },
+            "muara_bulian": { loc: [-1.75, 103.25], name: "Muara Bulian", label: "MBLAN" },
+            "sarolangun": { loc: [-2.30, 102.70], name: "Sarolangun", label: "SRLGN" },
+            "aur_duri": { loc: [-1.58, 103.55], name: "Aurduri", label: "ADURI" },
+            "new_aur_duri": { loc: [-1.65, 103.55], name: "New Aurduri", type: "500", label: "NADRI" },
+            "peranap": { loc: [-0.55, 102.00], name: "Peranap", type: "500", label: "PRNAP" },
+            "payo_selincah": { loc: [-1.60, 103.65], name: "Payo Selincah", label: "PSLCH" },
+            "sei_gelam": { loc: [-1.70, 103.65], name: "Sei Gelam", label: "SGLAM" },
+            "muara_sabak": { loc: [-1.15, 103.85], name: "Muara Sabak", label: "MSBAK" },
+            "kuala_tungkal": { loc: [-0.82, 103.45], name: "Kuala Tungkal", label: "KTKAL" },
+            "pelabuhan_dagang": { loc: [-0.95, 103.15], name: "Pelabuhan Dagang", label: "PBDAG" },
             // EKSTERNAL
-            "lubuk_linggau": { loc: [-3.30, 102.85], name: "Lubuk Linggau", type: "275" },
-            "padang_sidempuan": { loc: [1.35, 99.27], name: "P. Sidempuan", type: "275" },
-            "sumsel_v": { loc: [-2.5, 104.0], name: "Sumsel V", type: "275" },
-            "betung": { loc: [-2.8, 104.1], name: "Betung", type: "275" }
+            "lubuk_linggau": { loc: [-3.30, 102.85], name: "Lubuk Linggau", type: "275", label: "LBGAU" },
+            "padang_sidempuan": { loc: [1.35, 99.27], name: "P. Sidempuan", type: "275", label: "" },
+            "sumsel_v": { loc: [-2.5, 104.0], name: "Sumsel V", type: "275", label: "SMSL5" },
+            "betung": { loc: [-2.8, 104.1], name: "Betung", type: "275", label: "" }
         };
 
         var links = [
@@ -428,14 +446,43 @@
                 }).addTo(map);
             }
         });
+        // RENDER NODES (Gardu Induk)
         Object.keys(nodes).forEach(key => {
             var n = nodes[key];
             var color = n.type === "275" ? "#00a2e0" : (n.type === "500" ? "#003366" : "red");
+            
+            // 1. Marker Visual (Titik)
             var visual = L.circleMarker(n.loc, { radius: 5, fillColor: color, color: "white", weight: 1, fillOpacity: 1 }).addTo(map);
+            
+            // 2. Tambahkan Label Permanen (Menggunakan n.label jika ada, jika tidak pakai n.name)
+            var displayLabel = (n.label && n.label !== "") ? n.label : n.name;
+            
+            visual.bindTooltip(displayLabel, { 
+                permanent: true, 
+                direction: 'bottom', 
+                className: 'label-gi', 
+                offset: [0, 5] 
+            }).openTooltip();
+
+            // 3. Area Klik (Area sensitif untuk klik, tetap pakai n.name untuk tarik data Excel)
             var hit = L.circleMarker(n.loc, { radius: 15, color: 'transparent', fillOpacity: 0 }).addTo(map);
-            hit.bindTooltip(n.name, { direction: 'top', className: 'neon-tooltip' });
             hit.on('click', function() { onGIClick(n.name); });
         });
+
+        // Fungsi agar ukuran label mengecil/membesar otomatis saat di-zoom
+        map.on('zoomend', function() {
+            var currentZoom = map.getZoom();
+            var labels = document.querySelectorAll('.label-gi');
+            labels.forEach(label => {
+                // Rumus: Font size menyesuaikan level zoom. 
+                // Misal Zoom 7 = 9.8px, Zoom 10 = 14px.
+                var fontSize = currentZoom * 1.4; 
+                label.style.fontSize = fontSize + "px";
+            });
+        });
+
+        // Panggil fungsi sekali saat startup agar ukuran font awal sesuai
+        map.fire('zoomend');
 
         // --- 5. CHART JS (Inisialisasi) ---
         Chart.register(ChartDataLabels);
