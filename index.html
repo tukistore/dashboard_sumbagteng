@@ -1,109 +1,305 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Overview Sistem Sumbagteng</title>
-    
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
-    
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-polylinedecorator/1.6.0/leaflet.polylineDecorator.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-polylinedecorator/1.6.0/leaflet.polylineDecorator.min.js"></script>
 
     <style>
-        :root { 
+        :root {
             --bg-body: #eef2f5;
             --pln-blue: #0072bc;
             --pln-yellow: #ffe600;
             --text-dark: #333;
         }
-        
-        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; width: 100vw; background: var(--bg-body); font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        
-        header { 
-            flex-shrink: 0;
-            background: white; padding: 0 25px; height: 70px; display: flex; align-items: center; justify-content: space-between; 
-            border-bottom: 4px solid var(--pln-yellow); 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); z-index: 1001;
-        }
-        
-        .logo-area h1 { 
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 28px; font-weight: 700; letter-spacing: 2px; margin: 0; text-transform: uppercase;
-            background: -webkit-linear-gradient(45deg, #003366, #00a2e0);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.1));
-        }
-        
-        .theme-btn { background: #fff; border: 1px solid #ddd; color: #333; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; margin-right: 15px; }
 
-        .main-content { display: flex; flex: 1; overflow: hidden; position: relative; }
-        #map-box { width: 65%; height: 100%; position: relative; z-index: 1; }
-        #map { width: 100%; height: 100%; background: #fff; }
-        
-        #sidebar { 
-            width: 35%; height: 100%; background: #f4f7f6; padding: 15px; 
-            overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
-            border-left: 1px solid #ccc; box-shadow: -2px 0 10px rgba(0,0,0,0.05);
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            background: var(--bg-body);
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+
+        header {
+            flex-shrink: 0;
+            background: white;
+            padding: 0 25px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 4px solid var(--pln-yellow);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            z-index: 1001;
+        }
+
+        .logo-area h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin: 0;
+            text-transform: uppercase;
+            background: -webkit-linear-gradient(45deg, #003366, #00a2e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.1));
+        }
+
+        .theme-btn {
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #333;
+            padding: 6px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 15px;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #map-box {
+            width: 65%;
+            height: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+        }
+
+        #sidebar {
+            width: 35%;
+            height: 100%;
+            background: #f4f7f6;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border-left: 1px solid #ccc;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
             box-sizing: border-box;
         }
 
-        .dash-card { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); flex-shrink: 0; }
-        .dash-title { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; border-bottom: 2px solid #eee; padding-bottom: 5px; }
-        .bp-value { font-size: 32px; font-weight: 900; color: #333; }
-        .bp-date { font-size: 11px; color: #777; text-align: right; line-height: 1.2; }
-        
-        .reg-bar-container { display: flex; height: 15px; width: 100%; border-radius: 4px; overflow: hidden; margin: 5px 0; }
-        .reg-seg { height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 9px; font-weight: bold; }
-        
-        .dmn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .fuel-list { font-size: 11px; line-height: 1.6; color: #555; }
-        .fuel-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; }
-        
-        .chart-row { display: flex; gap: 10px; height: 220px; flex-shrink: 0; }
-        .chart-box { flex: 1; background: white; padding: 10px; border-radius: 8px; display: flex; flex-direction: column; min-width: 0; }
-        
-        .legend { position: absolute; bottom: 20px; left: 20px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 5px; font-size: 11px; z-index: 1000; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
-        .legend-item { display: flex; align-items: center; margin-bottom: 4px; }
-        .line-color { width: 25px; height: 3px; margin-right: 8px; }
-        .neon-tooltip { background: rgba(255,255,255,0.9); border: 1px solid #999; color: #333; font-weight: bold; font-size: 10px; padding: 1px 4px; border-radius: 3px; white-space: nowrap; }
+        .dash-card {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+        }
 
-        [data-theme="dark"] { --bg-body: #0f172a; --text-dark: #f1f5f9; }
-        [data-theme="dark"] header { background: #1e293b; border-bottom: 4px solid #ffe600; }
-        [data-theme="dark"] #sidebar { background: #0f172a; border-left: 1px solid #333; }
-        [data-theme="dark"] .dash-card, [data-theme="dark"] .chart-box { background: #1e293b; color: #fff; border: 1px solid #333; }
-        [data-theme="dark"] .bp-value { color: #fff; }
-        [data-theme="dark"] .legend { background: rgba(30, 41, 59, 0.9); color: #f1f5f9; border: 1px solid #444; }
-        .leg-sq { display:inline-block; width:8px; height:8px; margin-right:5px; border-radius:2px; }
+        .dash-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .bp-value {
+            font-size: 32px;
+            font-weight: 900;
+            color: #333;
+        }
+
+        .bp-date {
+            font-size: 11px;
+            color: #777;
+            text-align: right;
+            line-height: 1.2;
+        }
+
+        .reg-bar-container {
+            display: flex;
+            height: 15px;
+            width: 100%;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+
+        .reg-seg {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        .dmn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .fuel-list {
+            font-size: 11px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .fuel-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .chart-row {
+            display: flex;
+            gap: 10px;
+            height: 220px;
+            flex-shrink: 0;
+        }
+
+        .chart-box {
+            flex: 1;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            z-index: 1000;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .line-color {
+            width: 25px;
+            height: 3px;
+            margin-right: 8px;
+        }
+
+        .neon-tooltip {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #999;
+            color: #333;
+            font-weight: bold;
+            font-size: 10px;
+            padding: 1px 4px;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0f172a;
+            --text-dark: #f1f5f9;
+        }
+
+        [data-theme="dark"] header {
+            background: #1e293b;
+            border-bottom: 4px solid #ffe600;
+        }
+
+        [data-theme="dark"] #sidebar {
+            background: #0f172a;
+            border-left: 1px solid #333;
+        }
+
+        [data-theme="dark"] .dash-card,
+        [data-theme="dark"] .chart-box {
+            background: #1e293b;
+            color: #fff;
+            border: 1px solid #333;
+        }
+
+        [data-theme="dark"] .bp-value {
+            color: #fff;
+        }
+
+        [data-theme="dark"] .legend {
+            background: rgba(30, 41, 59, 0.9);
+            color: #f1f5f9;
+            border: 1px solid #444;
+        }
+
+        .leg-sq {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 5px;
+            border-radius: 2px;
+        }
+
         [data-theme="dark"] #gi-detail-content table {
-                    color: #ffffff !important;
-                    border-color: #444;
-                }
+            color: #ffffff !important;
+            border-color: #444;
+        }
 
-                [data-theme="dark"] #gi-detail-content thead {
-                    background-color: #334155 !important;
-                }
+        [data-theme="dark"] #gi-detail-content thead {
+            background-color: #334155 !important;
+        }
 
-                [data-theme="dark"] #gi-detail-content th {
-                    color: #ffffff !important;
-                }
+        [data-theme="dark"] #gi-detail-content th {
+            color: #ffffff !important;
+        }
 
-                [data-theme="dark"] .lwbp-header { background: #1e3a8a !important; color: white !important; }
-                [data-theme="dark"] .wbp-header { background: #9a3412 !important; color: white !important; }
+        [data-theme="dark"] .lwbp-header {
+            background: #1e3a8a !important;
+            color: white !important;
+        }
 
-                [data-theme="dark"] #gi-detail-content thead tr:nth-child(2) th {
-                    color: #ffffff !important;
-                    background-color: #475569 !important;
-                }
+        [data-theme="dark"] .wbp-header {
+            background: #9a3412 !important;
+            color: white !important;
+        }
 
-                [data-theme="dark"] #gi-detail-content th {
-                    color: #ffffff !important;
-                }
+        [data-theme="dark"] #gi-detail-content thead tr:nth-child(2) th {
+            color: #ffffff !important;
+            background-color: #475569 !important;
+        }
 
-                /* Label teks permanen di peta */
+        [data-theme="dark"] #gi-detail-content th {
+            color: #ffffff !important;
+        }
+
+        /* Label teks permanen di peta */
         .label-gi {
             background: transparent !important;
             border: none !important;
@@ -112,7 +308,8 @@
             font-weight: 800;
             text-shadow: 1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff;
             font-family: 'Rajdhani', sans-serif;
-            pointer-events: none; /* Supaya tidak menghalangi klik pada marker */
+            pointer-events: none;
+            /* Supaya tidak menghalangi klik pada marker */
         }
 
         /* Penyesuaian teks saat Mode Gelap */
@@ -122,10 +319,13 @@
         }
     </style>
 </head>
+
 <body>
 
     <header>
-        <div class="logo-area"><h1>OVERVIEW SISTEM SUMBAGTENG</h1></div>
+        <div class="logo-area">
+            <h1>OVERVIEW SISTEM SUMBAGTENG</h1>
+        </div>
         <div style="display:flex; align-items:center;">
             <button class="theme-btn" onclick="toggleTheme()" id="btnTheme">Mode Gelap 🌙</button>
             <div style="text-align:right;">
@@ -139,9 +339,15 @@
         <div id="map-box">
             <div id="map"></div>
             <div class="legend">
-                <div class="legend-item"><div class="line-color" style="background:red;"></div> SUTT 150 kV</div>
-                <div class="legend-item"><div class="line-color" style="background:#00a2e0;"></div> SUTET 275 kV</div>
-                <div class="legend-item"><div class="line-color" style="background:#003366;"></div> SUTET 500 kV</div>
+                <div class="legend-item">
+                    <div class="line-color" style="background:red;"></div> SUTT 150 kV
+                </div>
+                <div class="legend-item">
+                    <div class="line-color" style="background:#00a2e0;"></div> SUTET 275 kV
+                </div>
+                <div class="legend-item">
+                    <div class="line-color" style="background:#003366;"></div> SUTET 500 kV
+                </div>
             </div>
         </div>
 
@@ -149,26 +355,28 @@
             <div id="main-dashboard-content" style="display: flex; flex-direction: column; gap: 15px;">
                 <div class="dash-card">
                     <div class="dash-title">Beban Puncak</div>
-                        <div class="bp-header">
-                            <div class="bp-value">2358 MW</div>
-                            <div class="bp-date">Thursday, 30 Oct 2025<br>18:30 WIB</div>
-                        </div>
-                        <div class="reg-bar-container">
-                            <div class="reg-seg" style="width: 50%; background: #818cf8;">1194</div>
-                            <div class="reg-seg" style="width: 29%; background: #0070c0;">686</div>
-                            <div class="reg-seg" style="width: 21%; background: #ffc000;">510</div>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; font-size:10px; color:#555; margin-top:5px;">
-                            <span><span style="color:#818cf8;">■</span> Riau (1194)</span>
-                            <span><span style="color:#0070c0;">■</span> Sumbar (686)</span>
-                            <span><span style="color:#ffc000;">■</span> Jambi (510)</span>
+                    <div class="bp-header">
+                        <div class="bp-value">2358 MW</div>
+                        <div class="bp-date">Thursday, 30 Oct 2025<br>18:30 WIB</div>
+                    </div>
+                    <div class="reg-bar-container">
+                        <div class="reg-seg" style="width: 50%; background: #818cf8;">1194</div>
+                        <div class="reg-seg" style="width: 29%; background: #0070c0;">686</div>
+                        <div class="reg-seg" style="width: 21%; background: #ffc000;">510</div>
+                    </div>
+                    <div
+                        style="display:flex; justify-content:space-between; font-size:10px; color:#555; margin-top:5px;">
+                        <span><span style="color:#818cf8;">■</span> Riau (1194)</span>
+                        <span><span style="color:#0070c0;">■</span> Sumbar (686)</span>
+                        <span><span style="color:#ffc000;">■</span> Jambi (510)</span>
                     </div>
                 </div>
 
                 <div class="dmn-grid">
                     <div class="dash-card">
                         <div class="dash-title">Daya Mampu (DMN)</div>
-                        <div style="font-size:18px; font-weight:bold; color:var(--text-dark); margin-bottom:5px;">1749 MW</div>
+                        <div style="font-size:18px; font-weight:bold; color:var(--text-dark); margin-bottom:5px;">1749
+                            MW</div>
                         <div class="fuel-list">
                             <div class="fuel-row"><span>Air</span><b>435 MW</b></div>
                             <div class="fuel-row"><span>Panas Bumi</span><b>87 MW</b></div>
@@ -190,20 +398,31 @@
                     <div class="dash-title">Neraca Daya</div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div class="fuel-list" style="width:45%; font-size:11px;">
-                            <div class="fuel-row"><span style="display:flex;align-items:center;"><span class="leg-sq" style="background:#404e67;"></span>KIT</span><b>1197 MW</b></div>
-                            <div class="fuel-row"><span style="display:flex;align-items:center;"><span class="leg-sq" style="background:#ffc000;"></span>BP</span><b>2358 MW</b></div>
-                            <div class="fuel-row"><span style="display:flex;align-items:center;"><span class="leg-sq" style="background:#0070c0;"></span>SBS-SBT</span><b>1105 MW</b></div>
-                            <div class="fuel-row"><span style="display:flex;align-items:center;"><span class="leg-sq" style="background:#87cefa;"></span>SBU-SBT</span><b>89 MW</b></div>
+                            <div class="fuel-row"><span style="display:flex;align-items:center;"><span class="leg-sq"
+                                        style="background:#404e67;"></span>KIT</span><b>1197 MW</b></div>
+                            <div class="fuel-row"><span style="display:flex;align-items:center;"><span class="leg-sq"
+                                        style="background:#ffc000;"></span>BP</span><b>2358 MW</b></div>
+                            <div class="fuel-row"><span style="display:flex;align-items:center;"><span class="leg-sq"
+                                        style="background:#0070c0;"></span>SBS-SBT</span><b>1105 MW</b></div>
+                            <div class="fuel-row"><span style="display:flex;align-items:center;"><span class="leg-sq"
+                                        style="background:#87cefa;"></span>SBU-SBT</span><b>89 MW</b></div>
                         </div>
                         <div style="width:53%; font-size:10px;">
                             <div style="margin-bottom:2px; font-weight:bold;">PASOKAN</div>
-                            <div style="display:flex; width:100%; height:20px; margin-bottom:10px; border-radius:3px; overflow:hidden;">
-                                <div style="width:51%; background:#404e67; color:white; display:flex; align-items:center; justify-content:center; font-weight:bold;">51%</div>
-                                <div style="width:47%; background:#0070c0; color:white; display:flex; align-items:center; justify-content:center; font-weight:bold;">47%</div>
+                            <div
+                                style="display:flex; width:100%; height:20px; margin-bottom:10px; border-radius:3px; overflow:hidden;">
+                                <div
+                                    style="width:51%; background:#404e67; color:white; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                                    51%</div>
+                                <div
+                                    style="width:47%; background:#0070c0; color:white; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                                    47%</div>
                                 <div style="width:2%; background:#87cefa;"></div>
                             </div>
                             <div style="margin-bottom:2px; font-weight:bold;">BP</div>
-                            <div style="width:100%; height:20px; background:#ffc000; border-radius:3px; display:flex; align-items:center; justify-content:center; font-weight:bold; color:black;">2358 MW</div>
+                            <div
+                                style="width:100%; height:20px; background:#ffc000; border-radius:3px; display:flex; align-items:center; justify-content:center; font-weight:bold; color:black;">
+                                2358 MW</div>
                         </div>
                     </div>
                 </div>
@@ -231,22 +450,22 @@
 
         // --- 2. FUNGSI KLIK GI ---
         async function onGIClick(namaGI) {
-        const mainDiv = document.getElementById('main-dashboard-content');
-        const detailDiv = document.getElementById('gi-detail-content');
-        
-        mainDiv.style.display = 'none';
-        detailDiv.innerHTML = `<div class="dash-card"><h3>Memuat Data Komplit ${namaGI}...</h3></div>`;
+            const mainDiv = document.getElementById('main-dashboard-content');
+            const detailDiv = document.getElementById('gi-detail-content');
 
-        try {
-            const response = await fetch(`${urlAPI}?gi=${namaGI}`);
-            const data = await response.json();
+            mainDiv.style.display = 'none';
+            detailDiv.innerHTML = `<div class="dash-card"><h3>Memuat Data Komplit ${namaGI}...</h3></div>`;
 
-            if (data.length === 0) {
-                detailDiv.innerHTML = `<div class="dash-card"><h3>Data tidak ditemukan.</h3><button onclick="closeDetail()" style="width:100%; padding:10px;">Kembali</button></div>`;
-                return;
-            }
+            try {
+                const response = await fetch(`${urlAPI}?gi=${namaGI}`);
+                const data = await response.json();
 
-            let htmlContent = `
+                if (data.length === 0) {
+                    detailDiv.innerHTML = `<div class="dash-card"><h3>Data tidak ditemukan.</h3><button onclick="closeDetail()" style="width:100%; padding:10px;">Kembali</button></div>`;
+                    return;
+                }
+
+                let htmlContent = `
                 <div class="dash-card" style="padding: 10px;">
                     <div class="dash-title">DETAIL DATASET UFR: ${namaGI.toUpperCase()}</div>
                     <div style="font-size: 11px; margin-bottom: 8px;">Subsistem: <b>${data[0].subsistem}</b></div>
@@ -269,11 +488,11 @@
                             </thead>
                             <tbody>`;
 
-            data.forEach(row => {
-                // Logika warna: Merah jika BLOK, Biru jika AKTIF
-                let statusColor = row.keterangan.toUpperCase().includes("BLOK") ? "#ff4d4d" : "#0072bc";
-                
-                htmlContent += `
+                data.forEach(row => {
+                    // Logika warna: Merah jika BLOK, Biru jika AKTIF
+                    let statusColor = row.keterangan.toUpperCase().includes("BLOK") ? "#ff4d4d" : "#0072bc";
+
+                    htmlContent += `
                     <tr>
                         <td style="padding:5px; font-weight:bold;">${row.penyulang}</td>
                         <td align="center">${row.td}</td>
@@ -284,21 +503,21 @@
                         <td align="center"><b>${row.tahap}</b></td>
                         <td style="padding:2px 5px; color:${statusColor}; font-style:italic;">${row.keterangan}</td>
                     </tr>`;
-            });
+                });
 
-            htmlContent += `
+                htmlContent += `
                             </tbody>
                         </table>
                     </div>
                     <button onclick="closeDetail()" style="margin-top:15px; width:100%; padding:12px; cursor:pointer; background:var(--pln-blue); color:white; border:none; border-radius:5px; font-weight:bold; letter-spacing:1px;">KEMBALI KE OVERVIEW</button>
                 </div>`;
 
-            detailDiv.innerHTML = htmlContent;
+                detailDiv.innerHTML = htmlContent;
 
-        } catch (error) {
-            detailDiv.innerHTML = `<div class="dash-card"><h3>Gagal Memuat Data</h3><button onclick="closeDetail()">Kembali</button></div>`;
+            } catch (error) {
+                detailDiv.innerHTML = `<div class="dash-card"><h3>Gagal Memuat Data</h3><button onclick="closeDetail()">Kembali</button></div>`;
+            }
         }
-    }
 
         function closeDetail() {
             document.getElementById('main-dashboard-content').style.display = 'flex';
@@ -306,11 +525,11 @@
         }
 
         // --- 3. SETUP PETA ---
-        var map = L.map('map', { zoomControl: true, minZoom: 6 }).setView([-0.5, 102.0], 7); 
+        var map = L.map('map', { zoomControl: true, minZoom: 6 }).setView([-0.5, 102.0], 7);
         var lightLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png').addTo(map);
         var darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png');
 
-        window.addEventListener('resize', function() { map.invalidateSize(); });
+        window.addEventListener('resize', function () { map.invalidateSize(); });
 
         // --- 4. DATA NODES & LINKS ---
         var nodes = {
@@ -327,28 +546,28 @@
             "lubuk_alung": { loc: [-0.68, 100.28], name: "Lubuk Alung", label: "LBALG" },
             "pariaman": { loc: [-0.62, 100.12], name: "Pariaman", label: "PRMAN" },
             "maninjau": { loc: [-0.33, 100.20], name: "Maninjau", label: "MNJAU" },
-            "singkarak": { loc: [-0.62, 100.52], name: "Singkarak", label: "SNKRK"  },
-            "simpang_empat": { loc: [0.09, 99.80], name: "Simpang Empat", label: "SMPAT"  },
-            "pasaman": { loc: [0.20, 100.05], name: "Pasaman", label: "PSMAN"  },
-            "solok": { loc: [-0.79, 100.65], name: "Solok", label: "SOLOK"  },
-            "salak": { loc: [-0.70, 100.70], name: "Salak", label: "SALAK"  },
-            "ombilin": { loc: [-0.58, 100.75], name: "Ombilin", label: "OMBLN"  },
-            "padang_panjang": { loc: [-0.48, 100.40], name: "Padang Panjang", label: "PDPJG"  },
-            "batusangkar": { loc: [-0.45, 100.58], name: "BatuSangkar", label: "BTSKR"  },
-            "padang_luar": { loc: [-0.31, 100.37], name: "Padang Luar", label: "PDGLR"  },
-            "payakumbuh": { loc: [-0.22, 100.63], name: "Payakumbuh", type: "275", label: "PYBUH"  },
-            "kiliranjao": { loc: [-1.10, 101.35], name: "Kiliranjao", type: "275", label: "KLJAO"  },
+            "singkarak": { loc: [-0.62, 100.52], name: "Singkarak", label: "SNKRK" },
+            "simpang_empat": { loc: [0.09, 99.80], name: "Simpang Empat", label: "SMPAT" },
+            "pasaman": { loc: [0.20, 100.05], name: "Pasaman", label: "PSMAN" },
+            "solok": { loc: [-0.79, 100.65], name: "Solok", label: "SOLOK" },
+            "salak": { loc: [-0.70, 100.70], name: "Salak", label: "SALAK" },
+            "ombilin": { loc: [-0.58, 100.75], name: "Ombilin", label: "OMBLN" },
+            "padang_panjang": { loc: [-0.48, 100.40], name: "Padang Panjang", label: "PDPJG" },
+            "batusangkar": { loc: [-0.45, 100.58], name: "BatuSangkar", label: "BTSKR" },
+            "padang_luar": { loc: [-0.31, 100.37], name: "Padang Luar", label: "PDGLR" },
+            "payakumbuh": { loc: [-0.22, 100.63], name: "Payakumbuh", type: "275", label: "PYBUH" },
+            "kiliranjao": { loc: [-1.10, 101.35], name: "Kiliranjao", type: "275", label: "KLJAO" },
             // RIAU
-            "teluk_kuantan": { loc: [-0.52, 101.55], name: "Teluk Kuantan", label: "TLKTN"  },
-            "rengat": { loc: [-0.38, 102.55], name: "Rengat", label: "RNGAT"  },
-            "tembilahan": { loc: [-0.32, 103.15], name: "Tembilahan", label: "TMLAN"  },
-            "pkl_kerinci": { loc: [0.36, 101.86], name: "Pangkalan Kerinci", label: "PKKRC"  },
-            "pasir_putih": { loc: [0.38, 101.48], name: "Pasir Putih", label: "PSPTH"  },
-            "pltgu_riau": { loc: [0.56, 101.55], name: "PLTGU Riau", label: ""  },
-            "tenayan": { loc: [0.55, 101.52], name: "Tenayan", label: "TNYAN"  },
-            "perawang": { loc: [0.65, 101.60], name: "Perawang", type: "500", label: "PRWNG"  },
-            "teluk_lembu": { loc: [0.52, 101.48], name: "Teluk Lembu", label: "TLMBU"  },
-            "garuda_sakti": { loc: [0.45, 101.35], name: "Garuda Sakti", type: "275", label: "GRDSK"  },
+            "teluk_kuantan": { loc: [-0.52, 101.55], name: "Teluk Kuantan", label: "TLKTN" },
+            "rengat": { loc: [-0.38, 102.55], name: "Rengat", label: "RNGAT" },
+            "tembilahan": { loc: [-0.32, 103.15], name: "Tembilahan", label: "TMLAN" },
+            "pkl_kerinci": { loc: [0.36, 101.86], name: "Pangkalan Kerinci", label: "PKKRC" },
+            "pasir_putih": { loc: [0.38, 101.48], name: "Pasir Putih", label: "PSPTH" },
+            "pltgu_riau": { loc: [0.56, 101.55], name: "PLTGU Riau", label: "" },
+            "tenayan": { loc: [0.55, 101.52], name: "Tenayan", label: "TNYAN" },
+            "perawang": { loc: [0.65, 101.60], name: "Perawang", type: "500", label: "PRWNG" },
+            "teluk_lembu": { loc: [0.52, 101.48], name: "Teluk Lembu", label: "TLMBU" },
+            "garuda_sakti": { loc: [0.45, 101.35], name: "Garuda Sakti", type: "275", label: "GRDSK" },
             "gis_kota": { loc: [0.50, 101.42], name: "GIS Kota" },
             "bangkinang": { loc: [0.33, 101.02], name: "Bangkinang", label: "BNKNG" },
             "kotopanjang": { loc: [0.30, 100.80], name: "Koto Panjang", label: "KTPJG" },
@@ -438,9 +657,9 @@
         links.forEach(link => {
             var latlngs = link.path.map(id => nodes[id] ? nodes[id].loc : null).filter(x => x);
             if (latlngs.length > 1) {
-                L.polyline(latlngs, { 
-                    color: link.color, 
-                    weight: link.weight, 
+                L.polyline(latlngs, {
+                    color: link.color,
+                    weight: link.weight,
                     opacity: 0.8,
                     dashArray: link.dashArray ? link.dashArray : null
                 }).addTo(map);
@@ -450,33 +669,33 @@
         Object.keys(nodes).forEach(key => {
             var n = nodes[key];
             var color = n.type === "275" ? "#00a2e0" : (n.type === "500" ? "#003366" : "red");
-            
+
             // 1. Marker Visual (Titik)
             var visual = L.circleMarker(n.loc, { radius: 5, fillColor: color, color: "white", weight: 1, fillOpacity: 1 }).addTo(map);
-            
+
             // 2. Tambahkan Label Permanen (Menggunakan n.label jika ada, jika tidak pakai n.name)
             var displayLabel = (n.label && n.label !== "") ? n.label : n.name;
-            
-            visual.bindTooltip(displayLabel, { 
-                permanent: true, 
-                direction: 'bottom', 
-                className: 'label-gi', 
-                offset: [0, 5] 
+
+            visual.bindTooltip(displayLabel, {
+                permanent: true,
+                direction: 'bottom',
+                className: 'label-gi',
+                offset: [0, 5]
             }).openTooltip();
 
             // 3. Area Klik (Area sensitif untuk klik, tetap pakai n.name untuk tarik data Excel)
             var hit = L.circleMarker(n.loc, { radius: 15, color: 'transparent', fillOpacity: 0 }).addTo(map);
-            hit.on('click', function() { onGIClick(n.name); });
+            hit.on('click', function () { onGIClick(n.name); });
         });
 
         // Fungsi agar ukuran label mengecil/membesar otomatis saat di-zoom
-        map.on('zoomend', function() {
+        map.on('zoomend', function () {
             var currentZoom = map.getZoom();
             var labels = document.querySelectorAll('.label-gi');
             labels.forEach(label => {
                 // Rumus: Font size menyesuaikan level zoom. 
                 // Misal Zoom 7 = 9.8px, Zoom 10 = 14px.
-                var fontSize = currentZoom * 1.4; 
+                var fontSize = currentZoom * 1.4;
                 label.style.fontSize = fontSize + "px";
             });
         });
@@ -491,17 +710,17 @@
             data: { labels: ['Air', 'Panas Bumi', 'Bara', 'Gas', 'Bio', 'BBM'], datasets: [{ data: [25, 31, 37, 5, 2, 1], backgroundColor: ['#5b9bd5', '#ed7d31', '#a5a5a5', '#ffc000', '#70ad47', '#c00000'] }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
         });
-        
+
         var energyChart = new Chart(document.getElementById('energyChart'), {
             type: 'bar',
             data: { labels: ['20', '21', '22', '23', '24', '25'], datasets: [{ data: [10.9, 11.6, 12.2, 13.0, 13.9, 11.9], backgroundColor: '#cbe4c6' }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false} }, scales: { y: {display: false}, x: {grid: {display: false}} } }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
         });
 
         var bpChart = new Chart(document.getElementById('bpChart'), {
             type: 'line',
             data: { labels: ['20', '21', '22', '23', '24', '25'], datasets: [{ data: [1766, 1916, 1968, 2087, 2273, 2358], borderColor: '#5b9bd5', tension: 0.3 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false} }, scales: { y: {display: false}, x: {grid: {display: false}} } }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
         });
 
         function toggleTheme() {
@@ -517,4 +736,5 @@
         }
     </script>
 </body>
+
 </html>
